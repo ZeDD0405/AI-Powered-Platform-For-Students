@@ -137,6 +137,18 @@ const TeacherDashboard = () => {
     setQuestionForm({ ...questionForm, options: newOptions });
   };
 
+  const getDuplicateOptionIndices = (options) => {
+    const seen = {};
+    const dupes = new Set();
+    options.forEach((opt, i) => {
+      const key = opt.trim().toLowerCase();
+      if (!key) return;
+      if (seen[key] !== undefined) { dupes.add(seen[key]); dupes.add(i); }
+      else seen[key] = i;
+    });
+    return dupes;
+  };
+
   const handleAddQuestion = (e) => {
     e.preventDefault();
 
@@ -147,6 +159,11 @@ const TeacherDashboard = () => {
 
     if (questionForm.options.some(opt => !opt.trim())) {
       setToast({ message: "Please fill in all 4 options", type: "warning" });
+      return;
+    }
+
+    if (getDuplicateOptionIndices(questionForm.options).size > 0) {
+      setToast({ message: "All options must be unique — remove duplicate options", type: "warning" });
       return;
     }
 
@@ -720,28 +737,39 @@ const handlePublishTest = async () => {
                     </div>
                     <div className="col-12">
                       <label className="form-label fw-semibold">Options *</label>
-                      {questionForm.options.map((option, index) => (
-                        <div key={index} className="mb-2">
-                          <div className="input-group">
-                            <span className="input-group-text">
-                              <input
-                                type="radio"
-                                checked={questionForm.correctAnswer === index}
-                                onChange={() => setQuestionForm({...questionForm, correctAnswer: index})}
-                                className="form-check-input mt-0"
-                              />
-                            </span>
-                            <input
-                              type="text"
-                              className="form-control"
-                              value={option}
-                              onChange={(e) => handleOptionChange(index, e.target.value)}
-                              placeholder={`Option ${index + 1}`}
-                              required
-                            />
-                          </div>
-                        </div>
-                      ))}
+                      {(() => {
+                        const dupeIndices = getDuplicateOptionIndices(questionForm.options);
+                        return questionForm.options.map((option, index) => {
+                          const isDupe = dupeIndices.has(index);
+                          return (
+                            <div key={index} className="mb-2">
+                              <div className={`input-group ${isDupe ? "has-validation" : ""}`}>
+                                <span className={`input-group-text ${isDupe ? "border-danger" : ""}`}>
+                                  <input
+                                    type="radio"
+                                    checked={questionForm.correctAnswer === index}
+                                    onChange={() => setQuestionForm({...questionForm, correctAnswer: index})}
+                                    className="form-check-input mt-0"
+                                  />
+                                </span>
+                                <input
+                                  type="text"
+                                  className={`form-control ${isDupe ? "is-invalid" : ""}`}
+                                  value={option}
+                                  onChange={(e) => handleOptionChange(index, e.target.value)}
+                                  placeholder={`Option ${index + 1}`}
+                                  required
+                                />
+                                {isDupe && (
+                                  <div className="invalid-feedback d-block">
+                                    Duplicate option
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        });
+                      })()}
                       <small className="text-muted">
                         <i className="bi bi-info-circle me-1"></i>
                         Select the radio button to mark the correct answer

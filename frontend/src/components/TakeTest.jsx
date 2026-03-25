@@ -65,7 +65,7 @@ const TakeTest = () => {
     if (!imageData) return;
     const studentName = localStorage.getItem("studentName");
     const rollNo = localStorage.getItem("rollNo");
-    axios.post("http://localhost:5000/api/test-result/violation-snapshot", {
+    axios.post(__API__+"/api/test-result/violation-snapshot", {
       testId,
       rollNo,
       studentName,
@@ -112,7 +112,7 @@ const TakeTest = () => {
           return;
         }
 
-        const response = await axios.get(`http://localhost:5000/api/test/${testId}`);
+        const response = await axios.get(`${__API__}/api/test/${testId}`);
         if (response.data && response.data.success) {
           const testData = response.data.test;
           setTest(testData);
@@ -422,7 +422,7 @@ const TakeTest = () => {
   //   const rollNo = localStorage.getItem("rollNo");
 
   //   try {
-  //     const response = await axios.post("http://localhost:5000/api/test-result/submit", {
+  //     const response = await axios.post(__API__+"/api/test-result/submit", {
   //       testId,
   //       studentName,
   //       rollNo,
@@ -471,7 +471,7 @@ const TakeTest = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/test-result/submit",
+        __API__+"/api/test-result/submit",
         {
           testId,
           studentName,
@@ -634,14 +634,14 @@ const TakeTest = () => {
                   <div className="question-image-wrapper text-center mb-3">
                     <p>Image name: {currentQuestion.image}</p>
                     <img
-                      // src={`http://localhost:5000/uploads/${currentQuestion.image}`}
+                      // src={`${__API__}/uploads/${currentQuestion.image}`}
                       // alt="Question"
                       // className="img-fluid rounded"
                       // style={{ maxHeight: "300px" }}
                       // onError={(e) => {
                       // e.target.style.display = "none";
                       // console.log("Image failed:", currentQuestion.image);
-                      src={`http://localhost:5000/uploads/questions/${currentQuestion.image}`}
+                      src={`${__API__}/uploads/questions/${currentQuestion.image}`}
                       alt="Question"
                       style={{ maxWidth: "400px", borderRadius: "8px" }}
                       onError={(e) => {

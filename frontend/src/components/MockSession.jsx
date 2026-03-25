@@ -180,7 +180,7 @@ const MockSession = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/interview/respond-stream", {
+      const response = await fetch(__API__+"/api/interview/respond-stream", {
         method: "POST",
         signal: abortControllerRef.current.signal,
         headers: {
@@ -472,7 +472,7 @@ const MockSession = () => {
       setEnding(true);
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        "http://localhost:5000/api/interview/summary",
+        __API__+"/api/interview/summary",
         { messages, role },
         { headers: { Authorization: `Bearer ${token}` } }
       );

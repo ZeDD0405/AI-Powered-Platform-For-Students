@@ -87,7 +87,7 @@ const Home = () => {
     if (!branch) return;
     const fetchTodayTests = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/test/published?branch=${branch}`);
+        const res = await axios.get(`${__API__}/api/test/published?branch=${branch}`);
         if (res.data.success) {
           const today = new Date();
           const filtered = res.data.tests.filter(test => {
@@ -130,7 +130,7 @@ const Home = () => {
     setFpRollNo(rollNo); // already know who the user is
     setCpLoading(true);
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/forgot-password", { rollNo });
+      const res = await axios.post(__API__+"/api/auth/forgot-password", { rollNo });
       setFpMaskedEmail(res.data.email);
       setFpResendTimer(RESEND_WAIT);
       setCpMode("fp2"); // jump straight to OTP — skip the roll-number step
@@ -149,7 +149,7 @@ const Home = () => {
     if (cpNew.length < 6)    { setCpError("New password must be at least 6 characters."); return; }
     setCpLoading(true);
     try {
-      await axios.post("http://localhost:5000/api/auth/change-password", {
+      await axios.post(__API__+"/api/auth/change-password", {
         currentPassword: cpCurrent,
         newPassword: cpNew,
       });
@@ -168,7 +168,7 @@ const Home = () => {
     setCpError("");
     setCpLoading(true);
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/forgot-password", { rollNo: fpRollNo });
+      const res = await axios.post(__API__+"/api/auth/forgot-password", { rollNo: fpRollNo });
       setFpMaskedEmail(res.data.email);
       setFpResendTimer(RESEND_WAIT);
       setCpMode("fp2");
@@ -207,7 +207,7 @@ const Home = () => {
     if (code.length < 6) { setCpError("Enter the complete 6-digit code."); return; }
     setCpLoading(true);
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/verify-reset-otp", { rollNo: fpRollNo, otp: code });
+      const res = await axios.post(__API__+"/api/auth/verify-reset-otp", { rollNo: fpRollNo, otp: code });
       setFpResetToken(res.data.resetToken);
       setCpMode("fp3");
     } catch (err) {
@@ -224,7 +224,7 @@ const Home = () => {
     if (fpResendTimer > 0) return;
     setCpError("");
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/forgot-password", { rollNo: fpRollNo });
+      const res = await axios.post(__API__+"/api/auth/forgot-password", { rollNo: fpRollNo });
       setFpMaskedEmail(res.data.email);
       setFpResendTimer(RESEND_WAIT);
       setFpOtp(["","","","","",""]);
@@ -242,7 +242,7 @@ const Home = () => {
     if (fpNewPwd.length < 6) { setCpError("Password must be at least 6 characters."); return; }
     setCpLoading(true);
     try {
-      await axios.post("http://localhost:5000/api/auth/reset-password", {
+      await axios.post(__API__+"/api/auth/reset-password", {
         resetToken: fpResetToken,
         newPassword: fpNewPwd,
       });

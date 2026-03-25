@@ -32,7 +32,7 @@ const StudentsList = () => {
     setBranchData(prev => ({ ...prev, [branch]: { ...prev[branch], loading: true } }));
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/auth/students` +
+        `${__API__}/api/auth/students` +
         `?branch=${encodeURIComponent(branch)}` +
         `&search=${encodeURIComponent(search)}` +
         `&page=${page}&limit=${LIMIT}`

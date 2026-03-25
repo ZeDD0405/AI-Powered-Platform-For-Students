@@ -90,7 +90,7 @@ const TeacherDashboard = () => {
     try {
       if (append) setLoadingMore(true);
       const res = await axios.get(
-        `http://localhost:5000/api/test/all?page=${pg}&limit=10&search=${encodeURIComponent(search)}`
+        `${__API__}/api/test/all?page=${pg}&limit=10&search=${encodeURIComponent(search)}`
       );
       if (res.data?.success) {
         setTests(prev => append ? [...prev, ...res.data.tests] : res.data.tests);
@@ -214,13 +214,13 @@ setQuestionImage(null);
   //     };
   //     console.log("Publishing test with data:", testData);
 
-  //     const response = await axios.post("http://localhost:5000/api/test/create", testData);
+  //     const response = await axios.post(__API__+"/api/test/create", testData);
 
   //     if (response.data.success) {
   //       const testId = response.data.test._id;
 
   //       // Publish the test
-  //       const publishResponse = await axibranch: "os.put(`http://localhost:5000/api/test/publish/${testId}`);
+  //       const publishResponse = await axibranch: "os.put(`${__API__}/api/test/publish/${testId}`);
 
   //       if (publishResponse.data.success) {
   //         setToast({ message: "Test published successfully to students!", type: "success" });
@@ -281,7 +281,7 @@ const handlePublishTest = async () => {
     });
 
     const response = await axios.post(
-      "http://localhost:5000/api/test/create",
+      __API__+"/api/test/create",
       formData,
       { headers: { "Content-Type": "multipart/form-data" } }
     );
@@ -289,7 +289,7 @@ const handlePublishTest = async () => {
     if (response.data.success) {
       const testId = response.data.test._id;
 
-      await axios.put(`http://localhost:5000/api/test/publish/${testId}`);
+      await axios.put(`${__API__}/api/test/publish/${testId}`);
 
       setToast({ message: "Test published successfully!", type: "success" });
 
@@ -323,7 +323,7 @@ const handlePublishTest = async () => {
       message: "Are you sure you want to delete this test? This action cannot be undone.",
       onConfirm: async () => {
         try {
-          const response = await axios.delete(`http://localhost:5000/api/test/${id}`);
+          const response = await axios.delete(`${__API__}/api/test/${id}`);
           if (response.data.success) {
             setToast({ message: "Test deleted successfully!", type: "success" });
             setPage(1);
@@ -392,7 +392,7 @@ const handlePublishTest = async () => {
       fd.append("pdf", pdfFile);
       fd.append("subject", pdfDetails.subject);
       fd.append("numQuestions", pdfDetails.totalQuestions);
-      const res = await axios.post("http://localhost:5000/api/test/generate-from-pdf", fd, {
+      const res = await axios.post(__API__+"/api/test/generate-from-pdf", fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       if (res.data.success) {
@@ -441,11 +441,11 @@ const handlePublishTest = async () => {
       if (pdfDetails.deadline) fd.append("deadline", pdfDetails.deadline);
       fd.append("questions", JSON.stringify(selectedQuestions));
 
-      const res = await axios.post("http://localhost:5000/api/test/create", fd, {
+      const res = await axios.post(__API__+"/api/test/create", fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       if (res.data.success) {
-        await axios.put(`http://localhost:5000/api/test/publish/${res.data.test._id}`);
+        await axios.put(`${__API__}/api/test/publish/${res.data.test._id}`);
         setToast({ message: "PDF-based test published successfully!", type: "success" });
         resetPdfFlow();
         setPage(1);

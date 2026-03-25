@@ -70,22 +70,22 @@ const StudentProfile = () => {
 
   const fetchPending = (page, search, append) =>
     fetchSection("tests", setPendingData,
-      `http://localhost:5000/api/test/pending/${rollNo}?type=active&page=${page}&limit=${LIMIT}&search=${encodeURIComponent(search)}`,
+      `${__API__}/api/test/pending/${rollNo}?type=active&page=${page}&limit=${LIMIT}&search=${encodeURIComponent(search)}`,
       page, append);
 
   const fetchOutdated = (page, search, append) =>
     fetchSection("tests", setOutdatedData,
-      `http://localhost:5000/api/test/pending/${rollNo}?type=outdated&page=${page}&limit=${LIMIT}&search=${encodeURIComponent(search)}`,
+      `${__API__}/api/test/pending/${rollNo}?type=outdated&page=${page}&limit=${LIMIT}&search=${encodeURIComponent(search)}`,
       page, append);
 
   const fetchCompleted = (page, search, append) =>
     fetchSection("results", setCompletedData,
-      `http://localhost:5000/api/test-result/student/${rollNo}?page=${page}&limit=${LIMIT}&search=${encodeURIComponent(search)}`,
+      `${__API__}/api/test-result/student/${rollNo}?page=${page}&limit=${LIMIT}&search=${encodeURIComponent(search)}`,
       page, append);
 
   const fetchInterviews = (page, search, append) =>
     fetchSection("interviews", setInterviewData,
-      `http://localhost:5000/api/interview/student/${rollNo}?page=${page}&limit=${LIMIT}&search=${encodeURIComponent(search)}`,
+      `${__API__}/api/interview/student/${rollNo}?page=${page}&limit=${LIMIT}&search=${encodeURIComponent(search)}`,
       page, append);
 
   // ── initial load ───────────────────────────────────────────────
@@ -98,7 +98,7 @@ const StudentProfile = () => {
     (async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:5000/api/auth/student/${rollNo}`);
+        const res = await axios.get(`${__API__}/api/auth/student/${rollNo}`);
         if (!res.data?.success) throw new Error("Student not found");
         setStudent(res.data.student);
         await Promise.allSettled([

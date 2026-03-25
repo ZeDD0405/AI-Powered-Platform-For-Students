@@ -100,10 +100,10 @@ const StartTestDashboard = () => {
       const studentBranch = localStorage.getItem("studentBranch");
 
       // Fetch published tests for this branch
-      const testsResponse = await axios.get(`http://localhost:5000/api/test/published?branch=${studentBranch}`);
+      const testsResponse = await axios.get(`${__API__}/api/test/published?branch=${studentBranch}`);
 
       // Fetch student's submitted results
-      const resultsResponse = await axios.get(`http://localhost:5000/api/test-result/student/${roll}`);
+      const resultsResponse = await axios.get(`${__API__}/api/test-result/student/${roll}`);
 
       if (testsResponse.data && testsResponse.data.success) {
         const allTests = testsResponse.data.tests;
@@ -139,7 +139,7 @@ const StartTestDashboard = () => {
     try {
       const studentBranch = localStorage.getItem("studentBranch");
       const res = await axios.get(
-        `http://localhost:5000/api/test/published?branch=${studentBranch}&search=${encodeURIComponent(search)}`
+        `${__API__}/api/test/published?branch=${studentBranch}&search=${encodeURIComponent(search)}`
       );
       if (res.data?.success) {
         const submittedIds = submittedResults.map(r => r.testId?._id);
@@ -153,7 +153,7 @@ const StartTestDashboard = () => {
     try {
       const roll = rollNoRef.current;
       const res = await axios.get(
-        `http://localhost:5000/api/test-result/student/${roll}?search=${encodeURIComponent(search)}`
+        `${__API__}/api/test-result/student/${roll}?search=${encodeURIComponent(search)}`
       );
       if (res.data?.success) setSubmittedResults(res.data.results);
     } catch (err) { console.error(err); }

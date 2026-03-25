@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback } from "react";
 import axios from "axios";
 import "./ResumeAnalyser.css";
 
-const API = "http://localhost:5000";
+const API = __API__;
 
 /* ── helpers ──────────────────────────────────────────────── */
 const scoreColor = (s) =>

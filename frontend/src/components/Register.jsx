@@ -67,7 +67,7 @@ const Register = () => {
 
         setLoading(true);
         try {
-            const res = await axios.post("http://localhost:5000/api/auth/register", {
+            const res = await axios.post(__API__+"/api/auth/register", {
                 rollNo, name, email, password, confirmPassword, branch,
             });
             setSentEmail(res.data.email);
@@ -117,7 +117,7 @@ const Register = () => {
 
         setLoading(true);
         try {
-            await axios.post("http://localhost:5000/api/auth/verify-otp", {
+            await axios.post(__API__+"/api/auth/verify-otp", {
                 rollNo, otp: otpCode,
             });
             setSuccess("Account created! Redirecting to login...");
@@ -136,7 +136,7 @@ const Register = () => {
         if (resendTimer > 0) return;
         setError("");
         try {
-            await axios.post("http://localhost:5000/api/auth/resend-otp", { rollNo });
+            await axios.post(__API__+"/api/auth/resend-otp", { rollNo });
             setResendTimer(RESEND_WAIT);
             setOtp(["", "", "", "", "", ""]);
             otpRefs.current[0]?.focus();

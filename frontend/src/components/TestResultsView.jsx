@@ -37,13 +37,13 @@
 //       setLoading(true);
 
 //       // Fetch all results
-//       const resultsResponse = await axios.get("http://localhost:5000/api/test-result/all");
+//       const resultsResponse = await axios.get(__API__+"/api/test-result/all");
 //       if (resultsResponse.data.success) {
 //         setResults(resultsResponse.data.results);
 //       }
 
 //       // Fetch all tests
-//       const testsResponse = await axios.get("http://localhost:5000/api/test/all");
+//       const testsResponse = await axios.get(__API__+"/api/test/all");
 //       if (testsResponse.data.success) {
 //         setTests(testsResponse.data.tests);
 //       }
@@ -386,12 +386,12 @@ const TestResultsView = () => {
     try {
       setLoading(true);
 
-      const resultsResponse = await axios.get("http://localhost:5000/api/test-result/all");
+      const resultsResponse = await axios.get(__API__+"/api/test-result/all");
       if (resultsResponse.data.success) {
         setResults(resultsResponse.data.results);
       }
 
-      const testsResponse = await axios.get("http://localhost:5000/api/test/all");
+      const testsResponse = await axios.get(__API__+"/api/test/all");
       if (testsResponse.data.success) {
         setTests(testsResponse.data.tests);
       }
@@ -410,7 +410,7 @@ const TestResultsView = () => {
       setSelectedStudent(result);
 
       const res = await axios.get(
-        `http://localhost:5000/api/test-result/violation-snapshots/${result.testId?._id}/${result.rollNo}`
+        `${__API__}/api/test-result/violation-snapshots/${result.testId?._id}/${result.rollNo}`
       );
 
       if (res.data.success) {

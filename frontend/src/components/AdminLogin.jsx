@@ -4,7 +4,7 @@ import axios from "axios";
 import { setAdminAuth } from "../utils/auth";
 import "./AdminLogin.css";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API = import.meta.env.VITE_API_URL || __API__;
 
 const AdminLogin = () => {
   const navigate = useNavigate();

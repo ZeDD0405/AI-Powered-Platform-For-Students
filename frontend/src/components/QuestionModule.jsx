@@ -39,7 +39,7 @@ const QuestionModule = () => {
     e.preventDefault();
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/question/add-questions",
+        __API__+"/api/question/add-questions",
         {
           questions,
           branch: branch || "General",

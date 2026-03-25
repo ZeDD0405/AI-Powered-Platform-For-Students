@@ -35,7 +35,7 @@ const TestSpecificResults = () => {
     setSnapshotModal({ studentName: result.studentName, rollNo: result.rollNo, snapshots: [] });
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/test-result/violation-snapshots/${testId}/${result.rollNo}`
+        `${__API__}/api/test-result/violation-snapshots/${testId}/${result.rollNo}`
       );
       if (res.data?.success) {
         setSnapshotModal({ studentName: result.studentName, rollNo: result.rollNo, snapshots: res.data.snapshots });
@@ -55,7 +55,7 @@ const TestSpecificResults = () => {
     try {
       if (append) setLoadingMore(true);
       const res = await axios.get(
-        `http://localhost:5000/api/test-result/test/${testId}` +
+        `${__API__}/api/test-result/test/${testId}` +
         `?page=${pg}&limit=10&sortBy=${sb}&sortOrder=${so}`
       );
       if (res.data?.success) {
@@ -68,7 +68,7 @@ const TestSpecificResults = () => {
         const counts = {};
         await Promise.all(newResults.map(async (r) => {
           try {
-            const snap = await axios.get(`http://localhost:5000/api/test-result/violation-snapshots/${testId}/${r.rollNo}`);
+            const snap = await axios.get(`${__API__}/api/test-result/violation-snapshots/${testId}/${r.rollNo}`);
             counts[r.rollNo] = snap.data.snapshots?.length || 0;
           } catch { counts[r.rollNo] = 0; }
         }));
@@ -91,7 +91,7 @@ const TestSpecificResults = () => {
       setLoading(true);
       try {
         const [testRes] = await Promise.all([
-          axios.get(`http://localhost:5000/api/test/${testId}`),
+          axios.get(`${__API__}/api/test/${testId}`),
           fetchResultsPage(1, "date", "desc", false),
         ]);
         if (testRes.data?.success) setTest(testRes.data.test);

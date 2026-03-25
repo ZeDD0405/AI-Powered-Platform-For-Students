@@ -18,7 +18,7 @@ const BranchSelection = () => {
 
   const fetchBranches = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/question/branches");
+      const response = await axios.get(__API__+"/api/question/branches");
       setBranches(response.data.branches || []);
     } catch (error) {
       console.error("Error fetching branches:", error);

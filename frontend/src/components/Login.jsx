@@ -56,7 +56,7 @@ const Login = () => {
             if (isEmail) {
                 // Try admin first, then teacher
                 try {
-                    const adminRes = await axios.post("http://localhost:5000/api/admin/login", { email: rollNo, password });
+                    const adminRes = await axios.post(__API__+"/api/admin/login", { email: rollNo, password });
                     if (adminRes.data?.success) {
                         setAdminAuth(adminRes.data.token, adminRes.data.admin);
                         setSuccess("Admin login successful! Redirecting...");
@@ -66,7 +66,7 @@ const Login = () => {
                 } catch (adminErr) {
                     // Not an admin — fall through to teacher login
                 }
-                const response = await axios.post("http://localhost:5000/api/teacher/login", { email: rollNo, password });
+                const response = await axios.post(__API__+"/api/teacher/login", { email: rollNo, password });
                 if (response.data?.success) {
                     setTeacherAuth(response.data.token, response.data.teacher);
                     setSuccess("Teacher login successful! Redirecting...");
@@ -75,7 +75,7 @@ const Login = () => {
                     setError(response.data.error || "Invalid credentials");
                 }
             } else {
-                const response = await axios.post("http://localhost:5000/api/auth/login", { rollNo, password });
+                const response = await axios.post(__API__+"/api/auth/login", { rollNo, password });
                 if (response.data?.message === "Login successful") {
                     setStudentAuth(response.data.token, response.data.user);
                     setSuccess("Login successful! Redirecting...");
@@ -97,7 +97,7 @@ const Login = () => {
         setError("");
         setLoading(true);
         try {
-            const res = await axios.post("http://localhost:5000/api/auth/forgot-password", { rollNo: fpRollNo });
+            const res = await axios.post(__API__+"/api/auth/forgot-password", { rollNo: fpRollNo });
             setFpMaskedEmail(res.data.email);
             setFpResendTimer(60);
             setFpStep(2);
@@ -136,7 +136,7 @@ const Login = () => {
         if (code.length < 6) { setError("Enter the complete 6-digit code."); return; }
         setLoading(true);
         try {
-            const res = await axios.post("http://localhost:5000/api/auth/verify-reset-otp", { rollNo: fpRollNo, otp: code });
+            const res = await axios.post(__API__+"/api/auth/verify-reset-otp", { rollNo: fpRollNo, otp: code });
             setFpResetToken(res.data.resetToken);
             setFpStep(3);
         } catch (err) {
@@ -153,7 +153,7 @@ const Login = () => {
         if (fpResendTimer > 0) return;
         setError("");
         try {
-            const res = await axios.post("http://localhost:5000/api/auth/forgot-password", { rollNo: fpRollNo });
+            const res = await axios.post(__API__+"/api/auth/forgot-password", { rollNo: fpRollNo });
             setFpMaskedEmail(res.data.email);
             setFpResendTimer(60);
             setFpOtp(["","","","","",""]);
@@ -171,7 +171,7 @@ const Login = () => {
         if (fpNewPwd.length < 6) { setError("Password must be at least 6 characters."); return; }
         setLoading(true);
         try {
-            await axios.post("http://localhost:5000/api/auth/reset-password", {
+            await axios.post(__API__+"/api/auth/reset-password", {
                 resetToken: fpResetToken,
                 newPassword: fpNewPwd,
             });

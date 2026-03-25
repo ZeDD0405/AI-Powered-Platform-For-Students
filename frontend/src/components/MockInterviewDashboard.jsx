@@ -55,7 +55,7 @@ const MockInterviewDashboard = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `http://localhost:5000/api/interview/user/${rollNo}`,
+        `${__API__}/api/interview/user/${rollNo}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 

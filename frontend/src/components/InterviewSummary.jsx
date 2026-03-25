@@ -106,7 +106,7 @@ const InterviewSummary = () => {
       const today = new Date().toISOString().split("T")[0];
       const token = localStorage.getItem("token");
       await axios.post(
-        "http://localhost:5000/api/interview/save",
+        __API__+"/api/interview/save",
         {
           rollNo,
           studentName,

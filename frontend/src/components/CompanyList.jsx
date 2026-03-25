@@ -23,7 +23,7 @@ const CompanyList = () => {
   const fetchCompanies = async (search) => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/question/companies/${encodeURIComponent(branch)}?search=${encodeURIComponent(search)}`
+        `${__API__}/api/question/companies/${encodeURIComponent(branch)}?search=${encodeURIComponent(search)}`
       );
       setCompanies(response.data.companies || []);
     } catch (error) {
@@ -55,7 +55,7 @@ const CompanyList = () => {
     }
 
     try {
-      await axios.post("http://localhost:5000/api/question/create-company", {
+      await axios.post(__API__+"/api/question/create-company", {
         branch,
         companyName: newCompanyName.trim()
       });

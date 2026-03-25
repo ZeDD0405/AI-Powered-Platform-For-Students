@@ -53,7 +53,7 @@ const StartMockInterview = () => {
 
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:5000/api/interview/parse-resume",
+        __API__+"/api/interview/parse-resume",
         formDataUpload,
         { headers: { "Content-Type": "multipart/form-data", Authorization: `Bearer ${token}` } }
       );
@@ -90,7 +90,7 @@ const StartMockInterview = () => {
 
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        "http://localhost:5000/api/interview/start",
+        __API__+"/api/interview/start",
         { ...formData, resumeText },
         { headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` } }
       );

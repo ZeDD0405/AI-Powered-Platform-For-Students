@@ -24,7 +24,7 @@ const ViewQuestions = () => {
   const fetchQuestions = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/question/view/${encodeURIComponent(branch)}/${encodeURIComponent(company)}`
+        `${__API__}/api/question/view/${encodeURIComponent(branch)}/${encodeURIComponent(company)}`
       );
       const qs = res.data.questions || [];
       setQuestions(qs);
@@ -49,7 +49,7 @@ const ViewQuestions = () => {
     setConfirmTarget(null);
     setDeletingId(id);
     try {
-      await axios.delete(`http://localhost:5000/api/question/${id}`);
+      await axios.delete(`${__API__}/api/question/${id}`);
       setQuestions((prev) => prev.filter((q) => q._id !== id));
     } catch {
       // silently ignore — row stays

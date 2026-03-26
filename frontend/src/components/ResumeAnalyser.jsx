@@ -4,6 +4,93 @@ import "./ResumeAnalyser.css";
 
 const API = __API__;
 
+/* ── Build resume HTML from structured data ───────────────── */
+const sec = (title) =>
+  `<h2 style="font-size:7.5pt;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#111;border-bottom:1.5px solid #333;padding-bottom:2px;margin:10px 0 4px;">${title}</h2>`;
+
+const buildResumeHTML = (d) => {
+  const contactParts = [
+    d.contact?.email,
+    d.contact?.phone,
+    d.contact?.linkedin,
+    d.contact?.github,
+    d.contact?.portfolio,
+    d.contact?.location,
+  ].filter(Boolean);
+
+  let h = `<div id="resume-body" style="font-family:Arial,Helvetica,sans-serif;font-size:8.5pt;color:#111;line-height:1.38;padding:1.2cm 1.6cm;box-sizing:border-box;">`;
+
+  // Header
+  h += `<div style="text-align:center;margin-bottom:5px;">
+    <h1 style="margin:0;font-size:19pt;font-weight:800;letter-spacing:-0.5px;color:#111;">${d.name || ""}</h1>
+    <p style="margin:3px 0 0;font-size:8pt;color:#444;">${contactParts.join(" &nbsp;|&nbsp; ")}</p>
+  </div>
+  <hr style="border:none;border-top:2px solid #111;margin:5px 0 0;">`;
+
+  // Summary
+  if (d.summary) {
+    h += sec("Professional Summary");
+    h += `<p style="margin:0;font-size:8.5pt;line-height:1.4;">${d.summary}</p>`;
+  }
+
+  // Skills
+  if (d.skills?.length) {
+    h += sec("Skills");
+    h += d.skills.map(s =>
+      `<p style="margin:2px 0;font-size:8.5pt;"><strong>${s.category}:</strong> ${(s.items || []).join(", ")}</p>`
+    ).join("");
+  }
+
+  // Experience
+  if (d.experience?.length) {
+    h += sec("Work Experience");
+    h += d.experience.map(e => `
+      <div style="margin-bottom:5px;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;">
+          <strong style="font-size:9pt;">${e.title}${e.company ? ` &nbsp;|&nbsp; ${e.company}` : ""}</strong>
+          <span style="font-size:8pt;color:#555;white-space:nowrap;padding-left:8px;">${e.duration || ""}</span>
+        </div>
+        <ul style="margin:2px 0 0;padding-left:14px;">
+          ${(e.bullets || []).map(b => `<li style="font-size:8.5pt;margin-bottom:1px;">${b}</li>`).join("")}
+        </ul>
+      </div>`).join("");
+  }
+
+  // Projects
+  if (d.projects?.length) {
+    h += sec("Projects");
+    h += d.projects.map(p => `
+      <div style="margin-bottom:5px;">
+        <strong style="font-size:9pt;">${p.name}${p.tech ? `<span style="font-weight:400;color:#555;"> &nbsp;|&nbsp; ${p.tech}</span>` : ""}</strong>
+        <ul style="margin:2px 0 0;padding-left:14px;">
+          ${(p.bullets || []).map(b => `<li style="font-size:8.5pt;margin-bottom:1px;">${b}</li>`).join("")}
+        </ul>
+      </div>`).join("");
+  }
+
+  // Education
+  if (d.education?.length) {
+    h += sec("Education");
+    h += d.education.map(e => `
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;">
+        <div>
+          <strong style="font-size:9pt;">${e.degree}${e.institution ? `, ${e.institution}` : ""}</strong>
+          ${e.detail ? `<span style="font-size:8.5pt;color:#555;"> &middot; ${e.detail}</span>` : ""}
+        </div>
+        <span style="font-size:8pt;color:#555;white-space:nowrap;padding-left:8px;">${e.year || ""}</span>
+      </div>`).join("");
+  }
+
+  // Certifications
+  if (d.certifications?.length) {
+    h += sec("Certifications");
+    h += `<p style="margin:0;font-size:8.5pt;">${d.certifications.join(" &nbsp;&middot;&nbsp; ")}</p>`;
+  }
+
+  h += `</div>`;
+  return h;
+};
+
 /* ── helpers ──────────────────────────────────────────────── */
 const scoreColor = (s) =>
   s >= 80 ? "#10b981" : s >= 60 ? "#6366f1" : s >= 40 ? "#f59e0b" : "#ef4444";
@@ -88,7 +175,13 @@ const SECTIONS = [
   { key: "projects",   icon: "bi-diagram-3-fill",     label: "Projects" },
 ];
 
-const STEPS = [
+const getSteps = (hasJD) => hasJD ? [
+  "Parsing document…",
+  "Analysing content…",
+  "Matching to job description…",
+  "Generating optimised resume…",
+  "Finalising report…",
+] : [
   "Parsing document…",
   "Analysing content…",
   "Checking ATS compatibility…",
@@ -98,12 +191,15 @@ const STEPS = [
 
 /* ── Main component ──────────────────────────────────────── */
 const ResumeAnalyser = ({ onClose, asPage = false }) => {
-  const [phase,    setPhase]    = useState("upload"); // upload | analysing | result
-  const [file,     setFile]     = useState(null);
-  const [dragging, setDragging] = useState(false);
-  const [step,     setStep]     = useState(0);
-  const [error,    setError]    = useState("");
-  const [analysis, setAnalysis] = useState(null);
+  const [phase,           setPhase]           = useState("upload"); // upload | analysing | result
+  const [file,            setFile]            = useState(null);
+  const [dragging,        setDragging]        = useState(false);
+  const [step,            setStep]            = useState(0);
+  const [error,           setError]           = useState("");
+  const [analysis,        setAnalysis]        = useState(null);
+  const [jobDescription,  setJobDescription]  = useState("");
+  const [optimisedResume, setOptimisedResume] = useState(null);
+  const [activeTab,       setActiveTab]       = useState("analysis"); // analysis | optimised
   const inputRef = useRef();
 
   /* drag & drop */
@@ -123,25 +219,32 @@ const ResumeAnalyser = ({ onClose, asPage = false }) => {
   /* analyse */
   const handleAnalyse = async () => {
     if (!file) { setError("Please select a resume PDF first."); return; }
+    const steps = getSteps(!!jobDescription.trim());
     setPhase("analysing"); setError(""); setStep(0);
 
-    // Tick through steps for UX
     const ticker = setInterval(() => {
       setStep((s) => {
-        if (s >= STEPS.length - 1) { clearInterval(ticker); return s; }
+        if (s >= steps.length - 1) { clearInterval(ticker); return s; }
         return s + 1;
       });
-    }, 1800);
+    }, jobDescription.trim() ? 2200 : 1800);
 
     try {
       const form = new FormData();
       form.append("resume", file);
+      if (jobDescription.trim()) form.append("jobDescription", jobDescription.trim());
       const { data } = await axios.post(`${API}/api/interview/analyse-resume`, form, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       clearInterval(ticker);
       if (data.success) {
         setAnalysis(data.analysis);
+        let optData = null;
+        if (data.optimisedResume) {
+          try { optData = JSON.parse(data.optimisedResume); } catch { optData = null; }
+        }
+        setOptimisedResume(optData);
+        setActiveTab(optData ? "optimised" : "analysis");
         setPhase("result");
       } else {
         setError(data.error || "Analysis failed."); setPhase("upload");
@@ -153,8 +256,37 @@ const ResumeAnalyser = ({ onClose, asPage = false }) => {
     }
   };
 
+  const downloadPDF = () => {
+    const win = window.open("", "_blank");
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Optimised Resume</title>
+<style>
+  @page { size: A4 portrait; margin: 0; }
+  html, body { margin: 0; padding: 0; background: #fff; width: 210mm; height: 297mm; overflow: hidden; }
+  * { box-sizing: border-box; }
+  a { color: inherit; text-decoration: none; }
+  ul { list-style: disc; }
+</style>
+<script>
+window.onload = function() {
+  var el = document.getElementById('resume-body');
+  var A4_H = 297 * 3.7795; // 297mm in px at 96dpi
+  var h = el.offsetHeight;
+  if (h > A4_H) {
+    var scale = A4_H / h;
+    el.style.transform = 'scale(' + scale + ')';
+    el.style.transformOrigin = 'top left';
+    el.style.width = Math.round(100 / scale) + '%';
+  }
+  setTimeout(function(){ window.print(); }, 200);
+};
+<\/script>
+</head><body>${buildResumeHTML(optimisedResume)}</body></html>`);
+    win.document.close();
+  };
+
   const reset = () => {
-    setPhase("upload"); setFile(null); setAnalysis(null); setError(""); setStep(0);
+    setPhase("upload"); setFile(null); setAnalysis(null);
+    setOptimisedResume(null); setJobDescription(""); setError(""); setStep(0);
   };
 
   return (
@@ -211,15 +343,30 @@ const ResumeAnalyser = ({ onClose, asPage = false }) => {
               )}
             </div>
 
+            {/* Job Description */}
+            <div className="ra-jd-block">
+              <label className="ra-jd-label">
+                <i className="bi bi-briefcase-fill me-2" />
+                Job Description <span className="ra-jd-optional">(optional — for targeted ATS score &amp; optimised resume)</span>
+              </label>
+              <textarea
+                className="ra-jd-textarea"
+                rows={5}
+                placeholder="Paste the job description here to get an ATS-optimised version of your resume tailored to this specific role…"
+                value={jobDescription}
+                onChange={(e) => setJobDescription(e.target.value)}
+              />
+            </div>
+
             <div className="ra-upload-tips">
               <div className="ra-tip"><i className="bi bi-check-circle-fill" />Make sure your resume is text-based, not a scanned image</div>
               <div className="ra-tip"><i className="bi bi-check-circle-fill" />ATS score, section-wise grades, missing keywords & more</div>
-              <div className="ra-tip"><i className="bi bi-check-circle-fill" />Brutally honest feedback to help you get placed faster</div>
+              <div className="ra-tip"><i className="bi bi-check-circle-fill" />{jobDescription.trim() ? "Optimised resume tailored to your job description included" : "Add a job description to get a downloadable optimised resume"}</div>
             </div>
 
             <button className="ra-analyse-btn" onClick={handleAnalyse} disabled={!file}>
               <i className="bi bi-cpu-fill me-2" />
-              Analyse Resume
+              {jobDescription.trim() ? "Analyse & Optimise Resume" : "Analyse Resume"}
             </button>
           </div>
         )}
@@ -233,9 +380,9 @@ const ResumeAnalyser = ({ onClose, asPage = false }) => {
               <div className="ra-scan-ring ra-scan-ring--3" />
               <div className="ra-scan-core"><i className="bi bi-cpu-fill" /></div>
             </div>
-            <h3 className="ra-analysing-title">Analysing your resume…</h3>
+            <h3 className="ra-analysing-title">{jobDescription.trim() ? "Analysing & optimising your resume…" : "Analysing your resume…"}</h3>
             <div className="ra-steps">
-              {STEPS.map((s, i) => (
+              {getSteps(!!jobDescription.trim()).map((s, i) => (
                 <div key={i} className={`ra-step ${i < step ? "ra-step--done" : i === step ? "ra-step--active" : "ra-step--pending"}`}>
                   <span className="ra-step-dot">
                     {i < step ? <i className="bi bi-check-lg" /> : i === step ? <span className="ra-step-spinner" /> : null}
@@ -250,6 +397,46 @@ const ResumeAnalyser = ({ onClose, asPage = false }) => {
         {/* ── RESULT PHASE ── */}
         {phase === "result" && analysis && (
           <div className="ra-body ra-result">
+
+            {/* Tabs — only shown when optimised resume exists */}
+            {optimisedResume && (
+              <div className="ra-tabs">
+                <button
+                  className={`ra-tab ${activeTab === "analysis" ? "ra-tab--active" : ""}`}
+                  onClick={() => setActiveTab("analysis")}
+                >
+                  <i className="bi bi-bar-chart-fill me-2" />Analysis Report
+                </button>
+                <button
+                  className={`ra-tab ${activeTab === "optimised" ? "ra-tab--active" : ""}`}
+                  onClick={() => setActiveTab("optimised")}
+                >
+                  <i className="bi bi-stars me-2" />Optimised Resume
+                </button>
+              </div>
+            )}
+
+            {/* Optimised Resume Panel */}
+            {activeTab === "optimised" && optimisedResume && (
+              <div className="ra-opt-panel">
+                <div className="ra-opt-header">
+                  <div>
+                    <p className="ra-opt-title"><i className="bi bi-stars me-2" />ATS-Optimised Resume</p>
+                    <p className="ra-opt-sub">Rewritten for your target role · Ready to copy or download</p>
+                  </div>
+                  <button className="ra-download-btn" onClick={downloadPDF}>
+                    <i className="bi bi-download me-2" />Download PDF
+                  </button>
+                </div>
+                <div
+                  className="ra-opt-content"
+                  dangerouslySetInnerHTML={{ __html: buildResumeHTML(optimisedResume) }}
+                />
+              </div>
+            )}
+
+            {/* Analysis content — hidden when optimised tab is active */}
+            <div style={{ display: activeTab === "analysis" ? "contents" : "none" }}>
 
             {/* Score row */}
             <div className="ra-score-row">
@@ -352,7 +539,9 @@ const ResumeAnalyser = ({ onClose, asPage = false }) => {
               </ol>
             </div>
 
-            {/* Actions */}
+            </div>{/* end analysis wrapper */}
+
+            {/* Actions — always visible */}
             <div className="ra-result-actions">
               <button className="ra-retry-btn" onClick={reset}>
                 <i className="bi bi-arrow-repeat me-2" />Analyse Another Resume

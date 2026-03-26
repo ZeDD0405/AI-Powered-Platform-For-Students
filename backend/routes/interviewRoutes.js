@@ -109,6 +109,7 @@ router.post("/analyse-resume", upload.single("resume"), async (req, res) => {
     const buffer     = fs.readFileSync(req.file.path);
     const pdfData    = await pdfParse(buffer);
     const resumeText = pdfData.text.trim();
+    const jobDescription = (req.body.jobDescription || "").trim();
 
     // cleanup uploaded file
     try { fs.unlinkSync(req.file.path); } catch (_) {}
@@ -121,12 +122,16 @@ router.post("/analyse-resume", upload.single("resume"), async (req, res) => {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
+    const jobCtx = jobDescription
+      ? `\nJOB DESCRIPTION:\n${jobDescription.substring(0, 1500)}\n\nScore the resume against this specific role. Set "missingKeywords" to keywords from the job description that are absent from the resume.`
+      : "";
+
     const prompt = `You are an expert resume reviewer and ATS specialist with 15 years of experience in campus placements and technical hiring at top companies.
 
 Analyse the following resume and return a brutally honest, detailed assessment.
 
 RESUME TEXT:
-${resumeText.substring(0, 4500)}
+${resumeText.substring(0, 4000)}${jobCtx}
 
 Return ONLY valid JSON — no markdown fences, no explanation, just raw JSON — with this exact structure:
 {
@@ -143,7 +148,7 @@ Return ONLY valid JSON — no markdown fences, no explanation, just raw JSON —
   "strengths": ["<specific strength>", "<specific strength>", "<specific strength>"],
   "weaknesses": ["<specific weakness>", "<specific weakness>", "<specific weakness>", "<specific weakness>"],
   "presentKeywords": ["<keyword found in resume>", ... list up to 12 relevant tech/domain keywords actually found],
-  "missingKeywords": ["<important missing keyword>", ... list up to 10 highly recommended missing keywords for tech/campus roles],
+  "missingKeywords": ["<important missing keyword>", ... list up to 10 highly recommended missing keywords${jobDescription ? " from the job description" : " for tech/campus roles"}],
   "suggestions": ["<specific actionable improvement>", "<specific actionable improvement>", "<specific actionable improvement>", "<specific actionable improvement>", "<specific actionable improvement>"],
   "verdict": "<2-3 sentences of direct, honest assessment — do not sugarcoat>"
 }`;
@@ -161,7 +166,82 @@ Return ONLY valid JSON — no markdown fences, no explanation, just raw JSON —
       return res.status(500).json({ error: "Analysis parsing failed. Please try again." });
     }
 
-    res.json({ success: true, analysis });
+    // ── Generate optimised resume if job description provided ──
+    let optimisedResume = null;
+    if (jobDescription) {
+      const optPrompt = `You are a professional resume writer. Rewrite the following resume perfectly optimised for the job description. Maximise ATS score and role relevance.
+
+ORIGINAL RESUME:
+${resumeText.substring(0, 3500)}
+
+JOB DESCRIPTION:
+${jobDescription.substring(0, 1500)}
+
+Rules:
+- Keep the same candidate facts (name, email, phone, education, companies) — do NOT invent anything
+- Naturally weave keywords from the job description throughout
+- Rewrite bullet points with strong action verbs and quantified impact (use metrics from the original where available)
+- Include ALL roles, ALL projects, and ALL sections from the original — do not drop any
+- Keep to maximum 3 bullets per role and 2 bullets per project so everything fits on one page
+- Include only sections present in the original resume
+
+Return ONLY valid JSON (no markdown fences, no explanation) with this exact structure:
+{
+  "name": "Full Name",
+  "contact": {
+    "email": "...",
+    "phone": "...",
+    "linkedin": "linkedin.com/in/... or just username",
+    "github": "github.com/... or just username",
+    "portfolio": "url if present",
+    "location": "City, Country"
+  },
+  "summary": "2-3 sentence professional summary tailored to the role",
+  "skills": [
+    { "category": "Languages", "items": ["JavaScript", "Python"] },
+    { "category": "Frameworks", "items": ["React", "Node.js"] }
+  ],
+  "experience": [
+    {
+      "title": "Job Title",
+      "company": "Company Name",
+      "duration": "Jan 2024 – Present",
+      "bullets": ["Strong action-verb bullet with metric", "Another bullet"]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Project Name",
+      "tech": "React, Node.js, MongoDB",
+      "bullets": ["What it does and impact"]
+    }
+  ],
+  "education": [
+    {
+      "degree": "B.Tech Computer Engineering",
+      "institution": "University Name",
+      "year": "2022–2026",
+      "detail": "CGPA: 8.5"
+    }
+  ],
+  "certifications": ["Cert name if present"]
+}
+Omit "certifications" and "portfolio" keys if not present in original resume.`;
+
+      try {
+        const optResult = await model.generateContent(optPrompt);
+        let optRaw = optResult.response.text().trim()
+          .replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/\s*```$/i, "").trim();
+        // Validate it parses — return as string, frontend will parse
+        JSON.parse(optRaw); // throws if invalid
+        optimisedResume = optRaw;
+      } catch (e) {
+        console.error("Optimised resume generation failed:", e.message);
+        // non-fatal — analysis still returned
+      }
+    }
+
+    res.json({ success: true, analysis, optimisedResume });
   } catch (err) {
     console.error("Resume analysis error:", err.message);
     res.status(500).json({ error: "Analysis failed. Please try again." });

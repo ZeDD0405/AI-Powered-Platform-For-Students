@@ -354,6 +354,103 @@
 
 .mt-3 { margin-top: 0.75rem; }
 
+/* ── Job Description block ───────────────────────────────── */
+.ra-jd-block {
+  margin: 1rem 0 0;
+}
+.ra-jd-label {
+  display: block;
+  font-size: 0.82rem; font-weight: 700; color: rgba(255,255,255,0.6);
+  margin-bottom: 0.5rem;
+}
+.ra-jd-optional {
+  font-weight: 400; color: rgba(255,255,255,0.3);
+}
+.ra-jd-textarea {
+  width: 100%; box-sizing: border-box;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  color: rgba(255,255,255,0.8);
+  font-size: 0.84rem; line-height: 1.55;
+  padding: 0.85rem 1rem;
+  resize: vertical;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+.ra-jd-textarea::placeholder { color: rgba(255,255,255,0.2); }
+.ra-jd-textarea:focus {
+  outline: none;
+  border-color: rgba(99,102,241,0.5);
+  background: rgba(99,102,241,0.04);
+}
+
+/* ── Result tabs ─────────────────────────────────────────── */
+.ra-tabs {
+  display: flex; gap: 0.5rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px; padding: 0.35rem;
+}
+.ra-tab {
+  flex: 1; padding: 0.6rem 1rem;
+  background: transparent; border: none;
+  border-radius: 10px;
+  color: rgba(255,255,255,0.45);
+  font-size: 0.83rem; font-weight: 600;
+  cursor: pointer; transition: all 0.18s;
+  display: flex; align-items: center; justify-content: center;
+}
+.ra-tab:hover { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.05); }
+.ra-tab--active {
+  background: rgba(99,102,241,0.18);
+  color: #a5b4fc;
+  border: 1px solid rgba(99,102,241,0.3);
+}
+
+/* ── Optimised Resume panel ──────────────────────────────── */
+.ra-opt-panel {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px; overflow: hidden;
+}
+.ra-opt-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.06));
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  gap: 1rem; flex-wrap: wrap;
+}
+.ra-opt-title {
+  font-size: 0.9rem; font-weight: 700; color: #a5b4fc; margin: 0 0 0.2rem;
+}
+.ra-opt-title i { color: #f59e0b; }
+.ra-opt-sub { font-size: 0.75rem; color: rgba(255,255,255,0.35); margin: 0; }
+.ra-download-btn {
+  display: inline-flex; align-items: center;
+  padding: 0.55rem 1.25rem;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: none; border-radius: 10px;
+  color: #fff; font-size: 0.82rem; font-weight: 700;
+  cursor: pointer; white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(16,185,129,0.35);
+  transition: transform 0.15s, box-shadow 0.15s;
+  flex-shrink: 0;
+}
+.ra-download-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16,185,129,0.5); }
+.ra-opt-content {
+  margin: 1rem;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.35);
+  max-height: 500px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.2) transparent;
+}
+.ra-opt-content::-webkit-scrollbar { width: 4px; }
+.ra-opt-content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 4px; }
+
 /* ── Tips button & panel ─────────────────────────────────── */
 .ra-tips-btn {
   margin-top: 0.5rem;

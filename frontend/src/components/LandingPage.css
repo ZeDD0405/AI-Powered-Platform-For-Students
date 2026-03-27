@@ -715,9 +715,12 @@
   .lp-hero-text { align-items: center; display: flex; flex-direction: column; }
   .lp-hero-sub  { max-width: 100%; }
   .lp-hero-visual { display: none; }
-  .lp-how-steps { grid-template-columns: 1fr; max-width: 440px; }
+  /* 2-col steps on tablet, 1-col on mobile */
+  .lp-how-steps { grid-template-columns: repeat(2, 1fr); max-width: 700px; }
+  .lp-how-steps > :last-child { grid-column: 1 / -1; max-width: 320px; margin: 0 auto; }
   .lp-how-connector { display: none; }
   .lp-testi-grid { grid-template-columns: 1fr 1fr; }
+  .lp-feat-grid { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 768px) {

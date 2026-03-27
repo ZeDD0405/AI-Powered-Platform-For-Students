@@ -183,13 +183,16 @@ const TakeTest = () => {
   const requestFullscreen = async () => {
     try {
       const elem = document.documentElement;
-
       if (!document.fullscreenElement) {
-        if (elem.requestFullscreen) await elem.requestFullscreen();
+        if (elem.requestFullscreen)            await elem.requestFullscreen();
         else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-        else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+        else if (elem.msRequestFullscreen)     elem.msRequestFullscreen();
       }
-
+      // Keyboard Lock API — intercepts Escape & F11 at browser level (Chrome/Edge)
+      // This prevents ESC from ever triggering a fullscreen exit
+      if (navigator.keyboard?.lock) {
+        await navigator.keyboard.lock(['Escape', 'F11', 'F12']).catch(() => {});
+      }
       setIsTestLocked(false);
       setIsFullscreen(true);
     } catch (err) {
@@ -255,49 +258,57 @@ const TakeTest = () => {
   //   };
   // }, [submitting]);
 
+  /* ── Fullscreen: lock instantly on exit, re-enter on button click ── */
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      const inFullscreen = !!document.fullscreenElement;
-      setIsFullscreen(inFullscreen);
-
-      if (!inFullscreen && !submitting && !isTestLocked) {
-        setTimeout(() => {
-          requestFullscreen();
-        }, 400);
+    const onFSChange = () => {
+      const inFS = !!document.fullscreenElement;
+      setIsFullscreen(inFS);
+      if (!inFS && !submitting) {
+        // Show lock overlay immediately — student must click to re-enter
+        // (requestFullscreen needs a direct user gesture; the button click provides that)
+        setLockReason("Fullscreen was exited. You must return to fullscreen to continue.");
+        setIsTestLocked(true);
+        setTabSwitchCount(prev => prev + 1);
       }
     };
-
-    const handleEscKey = (e) => {
-      if (e.key === "Escape" && !submitting && !isTestLocked) {
-        setTimeout(() => {
-          requestFullscreen();
-        }, 200);
-      }
+    const onKeyDown = (e) => {
+      if (submitting) return;
+      // Block F11 toggle
+      if (e.key === 'F11') { e.preventDefault(); e.stopPropagation(); }
     };
-
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    document.addEventListener("keydown", handleEscKey);
-
+    document.addEventListener('fullscreenchange',       onFSChange);
+    document.addEventListener('webkitfullscreenchange', onFSChange);
+    document.addEventListener('keydown',                onKeyDown, true);
     return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-      document.removeEventListener("keydown", handleEscKey);
+      document.removeEventListener('fullscreenchange',       onFSChange);
+      document.removeEventListener('webkitfullscreenchange', onFSChange);
+      document.removeEventListener('keydown',                onKeyDown, true);
     };
-  }, [submitting, isTestLocked]);
+  }, [submitting]);
 
-
+  /* ── Block keyboard shortcuts that let students escape ── */
   useEffect(() => {
-    const handleUserClick = () => {
-      if (!document.fullscreenElement && !submitting && !isTestLocked) {
-        requestFullscreen();
-      }
+    const blockKeys = (e) => {
+      if (submitting) return;
+      const k = e.key.toLowerCase();
+      const blocked =
+        (e.ctrlKey  && ['t','w','n','l','r'].includes(k)) ||
+        (e.ctrlKey  && e.key === 'Tab') ||
+        (e.ctrlKey  && e.shiftKey && ['t','n','j','i'].includes(k)) ||
+        e.key === 'F5' || e.key === 'F12' ||
+        (e.altKey   && ['arrowleft','arrowright','f4'].includes(k));
+      if (blocked) { e.preventDefault(); e.stopPropagation(); }
     };
+    document.addEventListener('keydown', blockKeys, true);
+    return () => document.removeEventListener('keydown', blockKeys, true);
+  }, [submitting]);
 
-    document.addEventListener("click", handleUserClick);
-
-    return () => {
-      document.removeEventListener("click", handleUserClick);
-    };
-  }, [submitting, isTestLocked]);
+  /* ── Disable right-click ── */
+  useEffect(() => {
+    const block = (e) => { if (!submitting) e.preventDefault(); };
+    document.addEventListener('contextmenu', block);
+    return () => document.removeEventListener('contextmenu', block);
+  }, [submitting]);
 
 
   // Tab switch detection
@@ -455,6 +466,10 @@ const TakeTest = () => {
   const submitTestNow = async () => {
     setSubmitting(true);
 
+    // Release keyboard lock and exit fullscreen
+    if (navigator.keyboard?.unlock) navigator.keyboard.unlock();
+    if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+
     // STOP PROCTOR
     setProctorActive(false);
 
@@ -542,18 +557,23 @@ const TakeTest = () => {
         <div className="test-lock-overlay">
           <div className="lock-content">
             <div className="lock-icon">
-              <i className="bi bi-lock-fill"></i>
+              <i className="bi bi-shield-lock-fill"></i>
             </div>
-            <h3 className="lock-title">Test Locked</h3>
-            <p className="lock-message">
-              {lockReason}
-            </p>
+            <h3 className="lock-title">Test Paused</h3>
+            <p className="lock-message">{lockReason}</p>
+            <div className="lock-violations">
+              <i className="bi bi-exclamation-triangle-fill me-1"></i>
+              {tabSwitchCount} violation{tabSwitchCount !== 1 ? "s" : ""} recorded
+              {tabSwitchCount >= 3 && (
+                <span className="lock-warn"> &nbsp;·&nbsp; Auto-submit at 5</span>
+              )}
+            </div>
             <button
               className="btn btn-primary btn-lg go-fullscreen-btn"
               onClick={requestFullscreen}
             >
               <i className="bi bi-arrows-fullscreen me-2"></i>
-              Go Fullscreen
+              Return to Fullscreen
             </button>
           </div>
         </div>

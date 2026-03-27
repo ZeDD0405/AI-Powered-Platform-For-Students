@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./StartMockInterview.css";
+import { useToast } from "./ToastContext";
 
 const StartMockInterview = () => {
   const navigate = useNavigate();
+  const showToast = useToast();
 
   const [formData, setFormData] = useState({
     role: "",
@@ -76,12 +78,12 @@ const StartMockInterview = () => {
     const { role, experience } = formData;
 
     if (!role || !experience) {
-      alert("⚠️ Please fill out all fields before starting your mock interview!");
+      showToast("Please fill out all fields before starting your mock interview!", "warning");
       return;
     }
 
     if (!resumeFile || !resumeText) {
-      alert("⚠️ Please upload your resume (PDF) before starting the interview. It helps us create personalized questions!");
+      showToast("Please upload your resume (PDF) before starting the interview.", "warning");
       return;
     }
 
@@ -104,7 +106,7 @@ const StartMockInterview = () => {
       });
     } catch (error) {
       console.error("❌ Error starting mock interview:", error);
-      alert("Unable to start mock interview. Please ensure backend is running on port 5000.");
+      showToast("Unable to start mock interview. Please try again.", "error");
     } finally {
       setLoading(false);
     }

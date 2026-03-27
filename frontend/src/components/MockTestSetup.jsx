@@ -4,9 +4,11 @@ import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "./MockTestSetup.css";
+import { useToast } from "./ToastContext";
 
 const MockTestSetup = () => {
   const navigate = useNavigate();
+  const showToast = useToast();
 
   const branch = localStorage.getItem("studentBranch") || "";
   const [subject, setSubject]           = useState("");
@@ -72,11 +74,11 @@ const MockTestSetup = () => {
   // ── Start Test ──────────────────────────────────────────────
   const handleStart = async () => {
     if (!branch || !subject.trim() || !difficulty) {
-      alert("⚠️ Please fill out all fields before starting!");
+      showToast("Please fill out all fields before starting!", "warning");
       return;
     }
     if (!pdfFile || !pdfText) {
-      alert("⚠️ Please upload your subject PDF before starting the test.");
+      showToast("Please upload your subject PDF before starting the test.", "warning");
       return;
     }
 
@@ -97,7 +99,7 @@ const MockTestSetup = () => {
       }
     } catch (err) {
       console.error("Mock test error:", err);
-      alert("Unable to generate test. Please ensure the backend is running.");
+      showToast("Unable to generate test. Please try again.", "error");
     } finally {
       setLoading(false);
     }

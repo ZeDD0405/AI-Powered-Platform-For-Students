@@ -1,0 +1,42 @@
+/* ── Shimmer skeleton ── */
+.skel-box {
+  display: block;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.05) 25%,
+    rgba(255,255,255,0.11) 50%,
+    rgba(255,255,255,0.05) 75%
+  );
+  background-size: 200% 100%;
+  animation: skelShimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes skelShimmer {
+  0%   { background-position:  200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Testimonial card skeleton */
+.skel-testi-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 24px;
+  padding: 1.75rem;
+}
+
+.skel-stars {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 1rem;
+}
+
+.skel-author {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.skel-author-lines {
+  display: flex;
+  flex-direction: column;
+}

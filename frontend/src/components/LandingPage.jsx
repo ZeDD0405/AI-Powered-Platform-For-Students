@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import "./LandingPage.css";
+import { SkeletonTestiCard } from "./Skeleton";
 
 const API = __API__;
 
@@ -338,9 +339,8 @@ export default function LandingPage() {
           <p className="lp-section-sub">Real students. Real results. Real companies.</p>
         </div>
         {testiLoading ? (
-          <div className="lp-testi-loading">
-            <span className="lp-testi-spinner" />
-            <p>Loading feedback…</p>
+          <div className="lp-testi-grid">
+            {[0, 1, 2].map(i => <SkeletonTestiCard key={i} />)}
           </div>
         ) : testimonials.length === 0 ? (
           <div className="lp-testi-empty">

@@ -2,10 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import "./CompanyList.css";
+import { useToast } from "./ToastContext";
 
 const CompanyList = () => {
   const navigate = useNavigate();
   const { branch } = useParams();
+  const showToast = useToast();
   const [searchParams] = useSearchParams();
   const mode = searchParams.get("mode") || "add"; // 'add', 'view', or 'manage'
   const [companies, setCompanies] = useState([]);
@@ -50,7 +52,7 @@ const CompanyList = () => {
 
   const handleCreateCompany = async () => {
     if (!newCompanyName.trim()) {
-      alert("Please enter a company name");
+      showToast("Please enter a company name", "warning");
       return;
     }
 
@@ -67,7 +69,7 @@ const CompanyList = () => {
       navigate(`/question-module/${encodeURIComponent(branch)}/${encodeURIComponent(newCompanyName.trim())}`);
     } catch (error) {
       console.error("Error creating company:", error);
-      alert("Failed to create company. It might already exist.");
+      showToast("Failed to create company. It might already exist.", "error");
     }
   };
 

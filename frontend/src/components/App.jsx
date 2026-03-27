@@ -43,10 +43,12 @@ import StudentProfile from "./StudentProfile";
 import StudentsList from "./StudentsList";
 import ResumeAnalyserPage from "./ResumeAnalyserPage";
 import LandingPage from "./LandingPage";
+import { ToastProvider } from "./ToastContext";
 
 function App() {
   return (
     <BrowserRouter>
+      <ToastProvider>
       <Sidebar />
       <Routes>
         {/* Landing page */}
@@ -91,6 +93,7 @@ function App() {
 
 
       </Routes>
+      </ToastProvider>
     </BrowserRouter>
   );
 }

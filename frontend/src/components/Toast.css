@@ -125,6 +125,21 @@
   to   { width: 0%; }
 }
 
+/* ── Global toast stack (used by ToastContext) ── */
+.g-toast-stack {
+  position: fixed;
+  top: 20px; right: 20px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+  pointer-events: none;
+}
+.g-toast-item { pointer-events: all; }
+/* Override position: fixed on individual toasts inside the stack */
+.g-toast-item .toast-notification { position: static; }
+
 /* ── Responsive ── */
 @media (max-width: 576px) {
   .toast-notification {
@@ -133,4 +148,5 @@
     min-width: auto;
     max-width: none;
   }
+  .g-toast-stack { right: 10px; left: 10px; align-items: stretch; }
 }

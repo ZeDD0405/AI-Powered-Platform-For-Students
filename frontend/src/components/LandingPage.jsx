@@ -65,11 +65,46 @@ export default function LandingPage() {
   const [testimonials,  setTestimonials]  = useState([]);
   const [testiLoading,  setTestiLoading]  = useState(true);
 
-  /* ── Navbar scroll shadow ── */
+  /* ── Navbar shadow + scroll progress + hero parallax ── */
   useEffect(() => {
-    const h = () => setScrolled(window.scrollY > 60);
-    window.addEventListener("scroll", h);
-    return () => window.removeEventListener("scroll", h);
+    const onScroll = () => {
+      const sy = window.scrollY;
+      setScrolled(sy > 60);
+
+      /* Hero parallax */
+      const ht = document.querySelector(".lp-hero-text");
+      const hv = document.querySelector(".lp-hero-visual");
+      if (ht) ht.style.transform = `translateY(${sy * 0.12}px)`;
+      if (hv) hv.style.transform = `translateY(${sy * 0.07}px)`;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  /* ── 3D card tilt on mouse move ── */
+  useEffect(() => {
+    const onMove = (e) => {
+      const card = e.target.closest(".lp-tilt");
+      if (!card) return;
+      const r  = card.getBoundingClientRect();
+      const rx = -((e.clientY - r.top)  / r.height - 0.5) * 14;
+      const ry =  ((e.clientX - r.left) / r.width  - 0.5) * 18;
+      card.style.transform    = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) scale3d(1.03,1.03,1.03)`;
+      card.style.transition   = "transform 0.08s linear";
+    };
+    const onOut = (e) => {
+      const card = e.target.closest(".lp-tilt");
+      if (!card || card.contains(e.relatedTarget)) return;
+      card.style.transform  = "";
+      card.style.transition = "transform 0.55s cubic-bezier(0.22,1,0.36,1)";
+      setTimeout(() => { if (card) card.style.transition = ""; }, 560);
+    };
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseout",  onOut);
+    return () => {
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseout",  onOut);
+    };
   }, []);
 
   /* ── Typewriter ── */
@@ -253,7 +288,7 @@ export default function LandingPage() {
         </div>
         <div className="lp-feat-grid">
           {FEATURES.map((f, i) => (
-            <div key={f.id} className="lp-feat-card lp-reveal" style={{ "--delay": `${i * 0.1}s` }}>
+            <div key={f.id} className="lp-feat-card lp-reveal lp-tilt" style={{ "--delay": `${i * 0.1}s` }}>
               <div className="lp-feat-icon" style={{ background: f.gradient, boxShadow: `0 8px 28px ${f.glow}` }}>
                 <i className={`bi ${f.icon}`} />
               </div>
@@ -277,7 +312,7 @@ export default function LandingPage() {
         </div>
         <div className="lp-how-steps">
           {STEPS.map((s, i) => (
-            <div key={i} className="lp-how-step lp-reveal" style={{ "--delay": `${i * 0.15}s` }}>
+            <div key={i} className="lp-how-step lp-reveal lp-tilt" style={{ "--delay": `${i * 0.15}s` }}>
               <div className="lp-how-num" style={{ color: s.color, borderColor: `${s.color}44` }}>{s.num}</div>
               <div className="lp-how-icon" style={{ background: `${s.color}1a`, color: s.color }}>
                 <i className={`bi ${s.icon}`} />
@@ -318,7 +353,7 @@ export default function LandingPage() {
         ) : (
           <div className="lp-testi-grid">
             {testimonials.map((t, i) => (
-              <div key={t._id || i} className="lp-testi-card lp-reveal" style={{ "--delay": `${i * 0.1}s` }}>
+              <div key={t._id || i} className="lp-testi-card lp-reveal lp-tilt" style={{ "--delay": `${i * 0.1}s` }}>
                 <div className="lp-testi-stars">
                   {[...Array(t.rating || 5)].map((_, j) => <i key={j} className="bi bi-star-fill" />)}
                 </div>

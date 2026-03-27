@@ -15,14 +15,23 @@
 .lp-root a { text-decoration: none; color: inherit; }
 .lp-root i { pointer-events: none; }
 
-/* ── Scroll reveal ── */
+/* ── Scroll reveal (3D perspective rotateX) ── */
 .lp-reveal {
   opacity: 0;
-  transform: translateY(36px);
-  transition: opacity 0.75s cubic-bezier(0.22,1,0.36,1), transform 0.75s cubic-bezier(0.22,1,0.36,1);
+  transform: perspective(1000px) rotateX(14deg) translateY(40px) scale(0.97);
+  transform-origin: 50% 0%;
+  transition:
+    opacity   0.8s cubic-bezier(0.22,1,0.36,1),
+    transform 0.8s cubic-bezier(0.22,1,0.36,1);
   transition-delay: var(--delay, 0s);
 }
-.lp-reveal.lp-visible { opacity: 1; transform: translateY(0); }
+.lp-reveal.lp-visible {
+  opacity: 1;
+  transform: perspective(1000px) rotateX(0deg) translateY(0) scale(1);
+}
+
+/* ── Tilt cards — will-change for GPU ── */
+.lp-tilt { will-change: transform; }
 
 /* ── Float animations ── */
 @keyframes lpFloat {

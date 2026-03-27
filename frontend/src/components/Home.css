@@ -240,6 +240,16 @@
   color: #a7f3d0;
 }
 
+.h-dd-feedback {
+  background: rgba(99,102,241,0.1);
+  color: #a5b4fc;
+  border: 1px solid rgba(99,102,241,0.2);
+}
+.h-dd-feedback:hover {
+  background: rgba(99,102,241,0.22);
+  color: #c7d2fe;
+}
+
 .h-dd-logout {
   background: rgba(239,68,68,0.1);
   color: #fca5a5;

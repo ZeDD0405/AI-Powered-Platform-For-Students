@@ -42,14 +42,15 @@ import TestSpecificResults from "./TestSpecificResults";
 import StudentProfile from "./StudentProfile";
 import StudentsList from "./StudentsList";
 import ResumeAnalyserPage from "./ResumeAnalyserPage";
+import LandingPage from "./LandingPage";
 
 function App() {
   return (
     <BrowserRouter>
       <Sidebar />
       <Routes>
-        {/* Redirect root to /register */}
-        <Route path="/" element={<Navigate to="/register" />} />
+        {/* Landing page */}
+        <Route path="/" element={<LandingPage />} />
 
         {/* Auth Pages */}
         <Route path="/register" element={<Register />} />

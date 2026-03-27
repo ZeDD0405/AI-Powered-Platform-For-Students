@@ -9,7 +9,8 @@ const adminRoutes = require("./routes/adminRoutes");
 const testRoutes = require("./routes/testRoutes");
 const testResultRoutes = require("./routes/testResultRoutes");
 const path = require("path");
-const questionRoutes = require("./routes/questionRoutes");
+const questionRoutes  = require("./routes/questionRoutes");
+const feedbackRoutes  = require("./routes/feedbackRoutes");
 const { requireAuth } = require("./middleware/authMiddleware");
 
 
@@ -81,6 +82,7 @@ app.use("/api/test", requireAuth, testRoutes);
 app.use("/api/test-result", requireAuth, testResultRoutes);
 app.use("/api/question", requireAuth, questionRoutes);
 
+app.use("/api/feedback", feedbackRoutes); // GET /public is open; POST requires auth (handled inside router)
 app.use("/uploads", express.static("uploads"));
 
 // ---------------- Default Route ----------------

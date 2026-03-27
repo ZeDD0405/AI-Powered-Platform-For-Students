@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import "./Home.css";
 import ResumeAnalyser from "./ResumeAnalyser";
+import FeedbackModal from "./FeedbackModal";
 
 const passwordRules = [
   { id: "minLen",  label: "At least 6 characters",                    test: (p) => p.length >= 6 },
@@ -21,6 +22,7 @@ const Home = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showNotifs, setShowNotifs]     = useState(false);
   const [showResumeAnalyser, setShowResumeAnalyser] = useState(false);
+  const [showFeedback,       setShowFeedback]       = useState(false);
   const [todayTests, setTodayTests]     = useState([]);
 
   // ── Change Password modal state ──────────────────────────────
@@ -428,6 +430,13 @@ const Home = () => {
                     Change Password
                   </button>
                   <button
+                    className="h-dd-btn h-dd-feedback"
+                    onClick={() => { setShowDropdown(false); setShowFeedback(true); }}
+                  >
+                    <i className="bi bi-chat-heart-fill" />
+                    Give Feedback
+                  </button>
+                  <button
                     className="h-dd-btn h-dd-logout"
                     onClick={() => { setShowDropdown(false); handleLogout(); }}
                   >
@@ -497,6 +506,11 @@ const Home = () => {
       {/* ── Resume Analyser Modal ── */}
       {showResumeAnalyser && (
         <ResumeAnalyser onClose={() => setShowResumeAnalyser(false)} />
+      )}
+
+      {/* ── Feedback Modal ── */}
+      {showFeedback && (
+        <FeedbackModal onClose={() => setShowFeedback(false)} />
       )}
 
       {/* ── Change / Reset Password Modal ── */}

@@ -5,7 +5,7 @@ import "./Sidebar.css";
 
 // Routes where the sidebar must NOT appear
 const HIDDEN_ROUTES = [
-  "/register", "/login", "/admin-login",
+  "/", "/register", "/login", "/admin-login",
   "/mock-test-session", "/mock-session", "/pre-test-lobby",
 ];
 
